@@ -1,0 +1,27 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "951292c9daae618d57ede118a34bda72"
+name = "uchatbotplugin-shop"
+handle = "uchatbotplugin-shop"
+application_url = "https://pills-bryan-th-communities.trycloudflare.com"
+embedded = true
+
+[build]
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-04"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://pills-bryan-th-communities.trycloudflare.com/auth/callback",
+  "https://pills-bryan-th-communities.trycloudflare.com/auth/shopify/callback",
+  "https://pills-bryan-th-communities.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
