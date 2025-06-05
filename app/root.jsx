@@ -5,10 +5,20 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import { AppProvider } from "@shopify/polaris";
+import esTranslations from "@shopify/polaris/locales/es.json"; // O en.json
+import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
+
+export function links() {
+  return [
+    { rel: "stylesheet", href: polarisStyles },
+    // Si tienes otros estilos, añádelos aquí
+  ];
+}
 
 export default function App() {
   return (
-    <html>
+    <html lang="es">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -21,10 +31,14 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Outlet />
+        {/* Polaris AppProvider envuelve TODO el contenido */}
+        <AppProvider i18n={esTranslations}>
+          <Outlet />
+        </AppProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
 }
+
