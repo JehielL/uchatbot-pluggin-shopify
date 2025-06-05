@@ -1,43 +1,96 @@
-import { useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useJwt } from "./JwtProvider";
+import { useVisualConfig } from "./VisualConfigContext";
+import JwtDebug from "./JwtDebug";
+
+// ENDPOINTS (ajusta tu backend si es necesario)
+const API_BASE = "https://desarrollosfutura.com:5001/chat";
+
+async function getConfig(token) {
+  // Aquí asumo tu backend responde 404 si no existe aún la config
+  const res = await fetch(`${API_BASE}/get_config`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    // Si es 404 (sin config previa), simplemente devolvemos null para usar el default
+    if (res.status === 404) return null;
+    throw new Error("No se pudo cargar la configuración");
+  }
+  return await res.json();
+}
+
+export async function saveConfig(config, token) {
+  const res = await fetch(`${API_BASE}/guardar_config`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(config),
+  });
+  if (!res.ok) throw new Error("No se pudo guardar la configuración");
+  return res.json();
+}
+
+// --- Valores por defecto (reusables) ---
+const DEFAULT_CONFIG = {
+  botName: "uChatBot",
+  iconUrl: "https://novau.io/wp-content/uploads/2025/04/U.png",
+  language: "en",
+  context: "",
+  colors: {
+    headerBg: "#ea3103",
+    headerText: "#ffffff",
+    chatBg: "#ffffff",
+    chatText: "#000000",
+    buttonBg: "#ea3103",
+    buttonText: "#ffffff",
+    inputBg: "#ffffff",
+    inputText: "#000000",
+    inputBorder: "#ddd",
+    inputWrapperBg: "#f9f9f9",
+    privacyBg: "#f9f9f9",
+    privacyText: "#666"
+  }
+};
 
 export default function ConfigPanel() {
-  const [formData, setFormData] = useState({
-    botName: "uChatBot",
-    iconUrl: "https://novau.io/wp-content/uploads/2025/04/U.png",
-    language: "en",
-    context: "",
-    colors: {
-      headerBg: "#ea3103",
-      headerText: "#ffffff",
-      chatBg: "#ffffff",
-      chatText: "#000000",
-      buttonBg: "#ea3103",
-      buttonText: "#ffffff",
-      inputBg: "#ffffff",
-      inputText: "#000000",
-      inputBorder: "#ddd",
-      inputWrapperBg: "#f9f9f9",
-      privacyBg: "#f9f9f9",
-      privacyText: "#666"
-    }
-  });
+  const { token } = useJwt();
+  const { visualConfig, setVisualConfig } = useVisualConfig();
+  const [formData, setFormData] = useState(DEFAULT_CONFIG);
+  const [loading, setLoading] = useState(true);
+  const [isFirstConfig, setIsFirstConfig] = useState(false); // UX flag para mostrar mensaje especial
 
-/*   useEffect(() => {
-  const fetchConfig = async () => {
-    try {
-      const res = await fetch("https://desarrollosfutura.com/chat");
-      if (!res.ok) throw new Error("Error al cargar configuración");
-      const data = await res.json();
-      setFormData(data);
-    } catch (error) {
-      console.error("No se pudo cargar la configuración:", error.message);
+  // Cargar config real al montar (si hay token)
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
     }
-  };
-
-  fetchConfig();
-}, []);
- */
+    setLoading(true);
+    getConfig(token)
+      .then((data) => {
+        if (!data || Object.keys(data).length === 0 || data.error) {
+          // Primera vez: backend responde null/{} o error
+          setFormData(DEFAULT_CONFIG);
+          setVisualConfig(DEFAULT_CONFIG);
+          setIsFirstConfig(true);
+        } else {
+          setFormData(data);
+          setVisualConfig(data);
+          setIsFirstConfig(false);
+        }
+        setLoading(false);
+      })
+      .catch((e) => {
+        // Error de red u otro, asumimos que es primera vez (muestra defaults)
+        setFormData(DEFAULT_CONFIG);
+        setVisualConfig(DEFAULT_CONFIG);
+        setIsFirstConfig(true);
+        setLoading(false);
+      });
+    // eslint-disable-next-line
+  }, [token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,22 +107,37 @@ export default function ConfigPanel() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!token) {
+      alert("No tienes token, inicia sesión de nuevo");
+      return;
+    }
     try {
-      const res = await fetch("https://TU_BACKEND.com/api/config", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
-      if (res.ok) alert("Configuración guardada exitosamente");
-      else throw new Error("Error al guardar");
+      await saveConfig(formData, token);
+      setVisualConfig(formData); // Refleja el cambio en el chat
+      setIsFirstConfig(false);
+      alert("Configuración guardada y actualizada en el chatbot.");
     } catch (error) {
-      alert("Error: " + error.message);
+      alert("Error al guardar la configuración");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold">Configuración del Chatbot</h1>
+        <p>Cargando configuración…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold">Configuración del Chatbot</h1>
+      {isFirstConfig && (
+        <div className="mb-4 p-3 rounded bg-yellow-100 border border-yellow-400 text-yellow-900">
+          Es la primera vez que configuras tu chatbot. Personaliza a tu gusto y guarda para comenzar 🚀
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           className="w-full p-2 border rounded"
@@ -123,6 +191,10 @@ export default function ConfigPanel() {
           Guardar configuración
         </button>
       </form>
+      <div className="p-6 space-y-4">
+        <h1 className="text-2xl font-bold">Debug JWT</h1>
+        <JwtDebug />
+      </div>
     </div>
   );
 }

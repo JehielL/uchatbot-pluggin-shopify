@@ -6,13 +6,17 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import { AppProvider } from "@shopify/polaris";
-import esTranslations from "@shopify/polaris/locales/es.json"; // O en.json
+import esTranslations from "@shopify/polaris/locales/es.json";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
+import { VisualConfigProvider } from "./routes/VisualConfigContext";
+
+import { JwtProvider } from "./routes/JwtProvider";
+import FloatingChatbot from "./routes/FloatingChatbot"; // <-- importa el nuevo componente
 
 export function links() {
   return [
     { rel: "stylesheet", href: polarisStyles },
-    // Si tienes otros estilos, añádelos aquí
+    // Otros estilos si los tienes
   ];
 }
 
@@ -31,14 +35,18 @@ export default function App() {
         <Links />
       </head>
       <body>
-        {/* Polaris AppProvider envuelve TODO el contenido */}
-        <AppProvider i18n={esTranslations}>
-          <Outlet />
-        </AppProvider>
+        {/* JwtProvider envuelve TODO tu contenido */}
+        <JwtProvider>
+          <VisualConfigProvider>
+            <AppProvider i18n={esTranslations}>
+              <Outlet />
+              <FloatingChatbot />
+            </AppProvider>
+          </VisualConfigProvider>
+        </JwtProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
 }
-

@@ -4,12 +4,12 @@ import React, { useState, useEffect, useRef } from "react";
 // Puedes pasar estas props desde el parent si prefieres, pero así es plug & play
 const config = window.shopifyChatbotConfig || {};
 const apiKey = config.api_key;
-const tenantToken = config.auth_token;
 const nombreChatBot = config.name || "uChatBot";
 const iconUrl = config.icon || "";
 const colors = config.colors || {};
 const privacyPolicyUrl = config.privacyPolicyUrl || "#";
 const tags = config.tags || { es: {}, en: {} };
+import { useJwt } from "./routes/JwtProvider";
 
 const translations = {
   es: {
@@ -68,6 +68,7 @@ function generateUUID() {
 
 export default function Chatbot() {
   // ---- State
+  const { token: jwtToken } = useJwt();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState(localStorage.getItem("session_id") || generateUUID());
@@ -140,7 +141,8 @@ export default function Chatbot() {
     try {
       const response = await fetch('https://desarrollosfutura.com:5001/chat/get_contexto', {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${tenantToken}`, 'Content-Type': 'application/json' }
+        headers: { 'Authorization': `Bearer ${jwtToken}`
+, 'Content-Type': 'application/json' }
       });
       if (!response.ok) throw new Error();
       const data = await response.json();
@@ -158,7 +160,8 @@ export default function Chatbot() {
         headers: {
           "Content-Type": "application/json",
           "x-api-key": apiKey,
-          "Authorization": `Bearer ${tenantToken}`
+          'Authorization': `Bearer ${jwtToken}`
+
         }
       });
       // No hace falta parsear, solo para mantener lógica
@@ -183,7 +186,8 @@ export default function Chatbot() {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
           'x-session-id': sessionId,
-          'Authorization': `Bearer ${tenantToken}`
+          'Authorization': `Bearer ${jwtToken}`
+
         },
         credentials: 'include'
       });
@@ -221,7 +225,7 @@ export default function Chatbot() {
     setLoading(true);
 
     try {
-      if (!tenantToken) {
+      if (!jwtToken) {
         alert("Debes iniciar sesión para usar el chatbot.");
         setLoading(false);
         return;
@@ -231,7 +235,8 @@ export default function Chatbot() {
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
-          'Authorization': `Bearer ${tenantToken}`,
+          'Authorization': `Bearer ${jwtToken}`
+
         },
         body: JSON.stringify({ message: msg }),
         credentials: 'include'

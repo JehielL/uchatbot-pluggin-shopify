@@ -7,21 +7,40 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [shopDomain, setShopDomain] = useState(""); // <-- Nuevo
   const navigate = useNavigate();
 
-  // Si ya hay sesión, redirige automáticamente
+  // Detectar dominio SOLO en cliente
   useEffect(() => {
     if (typeof window !== "undefined") {
-      if (localStorage.getItem("auth_token")) {
-        navigate("/config"); // O "/dashboards"
-      }
+      // Adapta esto a tu método real de obtener el shop
+      setShopDomain(window.Shopify?.shop || "robota.store");
     }
-  }, [navigate]);
+  }, []);
+
+  // Si ya hay JWT global guardado para este shop, redirige a /wizard
+  useEffect(() => {
+    if (!shopDomain) return;
+    (async () => {
+      try {
+        const res = await fetch(
+          `https://desarrollosfutura.com:5001/chat/obtener_token_global?shop=${shopDomain}`
+        );
+        const data = await res.json();
+        if (res.ok && data.token) {
+          navigate("/wizard");
+        }
+      } catch (e) {
+        // Si no hay token global, se queda en login
+      }
+    })();
+  }, [navigate, shopDomain]);
 
   const handleLogin = async () => {
     setLoading(true);
     setError("");
     try {
+      // 1. Login contra backend Flask
       const response = await fetch("https://desarrollosfutura.com:5001/auth/login", {
         method: "POST",
         headers: {
@@ -31,11 +50,30 @@ export default function Login() {
       });
       const result = await response.json();
 
-      if (response.ok) {
-        localStorage.setItem("auth_token", result.token);
-        localStorage.setItem("user_id", result.user_id);
-        localStorage.setItem("user_email", email);
-        navigate("/wizard"); // O "/dashboards"
+      if (response.ok && result.token) {
+        // 2. Guardar JWT en backend Flask para este shop
+        const saveTokenResponse = await fetch(
+          "https://desarrollosfutura.com:5001/chat/guardar_token_global",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              shop: shopDomain,
+              token: result.token,
+              user_id: result.user_id,
+              email,
+            }),
+          }
+        );
+
+        if (!saveTokenResponse.ok) {
+          setError("No se pudo guardar el token global. Intenta de nuevo.");
+          setLoading(false);
+          return;
+        }
+
+        // 3. Redirige al wizard
+        navigate("/wizard");
       } else {
         setError(result.error || "Error en el login. Intenta de nuevo.");
       }
@@ -70,6 +108,7 @@ export default function Login() {
           loading={loading}
           fullWidth
           style={{ marginTop: 20 }}
+          disabled={!shopDomain}
         >
           Iniciar sesión
         </Button>

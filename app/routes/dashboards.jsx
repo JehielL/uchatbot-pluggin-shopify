@@ -2,6 +2,7 @@ import { Page, Card, Button } from "@shopify/polaris";
 import { useNavigate } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { getConfig } from "./api";
+import { useJwt } from "./JwtProvider";
 
 export default function Dashboard() {
   const [config, setConfig] = useState(null);
