@@ -73,7 +73,7 @@ export default function Login() {
         }
 
         // 3. Redirige al wizard
-        navigate("/wizard");
+        navigate("/app");
       } else {
         setError(result.error || "Error en el login. Intenta de nuevo.");
       }

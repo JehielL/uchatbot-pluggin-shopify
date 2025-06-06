@@ -257,7 +257,7 @@ export default function Dashboards() {
 
         <Card title="Quick Links">
           <BlockStack gap="200" direction="horizontal">
-            <Button url="/app/avanzada" primary>
+            <Button url="/contextosmanager" primary>
               Upload Context
             </Button>
             <Button url="/app/personalizacion">Customization</Button>

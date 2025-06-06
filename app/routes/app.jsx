@@ -48,6 +48,7 @@ export default function App() {
           <Link to="/wizard">Asistente de Configuración</Link>
           <Link to="/dashboards">Dashboard</Link>
           <Link to="/leads">Dashboard</Link>
+          <Link to="/contextosmanager">Dashboard</Link>
           
         </NavMenu>
         <JwtDebug />
