@@ -9,6 +9,7 @@ import { AppProvider } from "@shopify/polaris";
 import esTranslations from "@shopify/polaris/locales/es.json";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import { VisualConfigProvider } from "./routes/VisualConfigContext";
+import chatbotStyles from "/chatbot.css?url";
 
 import { JwtProvider } from "./routes/JwtProvider";
 import FloatingChatbot from "./routes/FloatingChatbot"; // <-- importa el nuevo componente
@@ -16,6 +17,7 @@ import FloatingChatbot from "./routes/FloatingChatbot"; // <-- importa el nuevo 
 export function links() {
   return [
     { rel: "stylesheet", href: polarisStyles },
+    { rel: "stylesheet", href: chatbotStyles },
     // Otros estilos si los tienes
   ];
 }

@@ -1,25 +1,25 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "7baf4e7946b81bcfcd9a98c80ac4d605"
-name = "uchatbot-pluggin"
-handle = "uchatbot-pluggin"
-application_url = "https://confident-wearing-follows-pointing.trycloudflare.com"
+client_id = "8d0a28343fb384a159847610d6656557"
+name = "uchatbot"
+handle = "uchatbot"
+application_url = "https://checklist-file-meal-pixel.trycloudflare.com"
 embedded = true
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-04"
 
   [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
   topics = [ "app/scopes_update" ]
   uri = "/webhooks/app/scopes_update"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://confident-wearing-follows-pointing.trycloudflare.com/auth/callback",
-  "https://confident-wearing-follows-pointing.trycloudflare.com/auth/shopify/callback",
-  "https://confident-wearing-follows-pointing.trycloudflare.com/api/auth/callback"
+  "https://checklist-file-meal-pixel.trycloudflare.com/auth/callback",
+  "https://checklist-file-meal-pixel.trycloudflare.com/auth/shopify/callback",
+  "https://checklist-file-meal-pixel.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
