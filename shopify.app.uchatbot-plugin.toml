@@ -3,11 +3,12 @@
 client_id = "19b0cd62b5688f3d133ddad75d62b58c"
 name = "uchatbot-plugin"
 handle = "uchatbot-plugin"
-application_url = "https://isolated-tracy-optional-excitement.trycloudflare.com"
+application_url = "https://inform-desktop-alive-notified.trycloudflare.com"
 embedded = true
 
 [build]
 include_config_on_deploy = true
+automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-04"
@@ -18,9 +19,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://isolated-tracy-optional-excitement.trycloudflare.com/auth/callback",
-  "https://isolated-tracy-optional-excitement.trycloudflare.com/auth/shopify/callback",
-  "https://isolated-tracy-optional-excitement.trycloudflare.com/api/auth/callback"
+  "https://inform-desktop-alive-notified.trycloudflare.com/auth/callback",
+  "https://inform-desktop-alive-notified.trycloudflare.com/auth/shopify/callback",
+  "https://inform-desktop-alive-notified.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

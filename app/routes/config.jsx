@@ -2,17 +2,27 @@ import { useEffect, useState } from "react";
 import { useJwt } from "./JwtProvider";
 import { useVisualConfig } from "./VisualConfigContext";
 import JwtDebug from "./JwtDebug";
+import {
+  Page,
+  Layout,
+  Card,
+  Form,
+  FormLayout,
+  TextField,
+  Select,
+  Button,
+
+  Thumbnail,
+} from "@shopify/polaris";
 
 // ENDPOINTS (ajusta tu backend si es necesario)
 const API_BASE = "https://desarrollosfutura.com:5001/chat";
 
 async function getConfig(token) {
-  // Aquí asumo tu backend responde 404 si no existe aún la config
   const res = await fetch(`${API_BASE}/get_config`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) {
-    // Si es 404 (sin config previa), simplemente devolvemos null para usar el default
     if (res.status === 404) return null;
     throw new Error("No se pudo cargar la configuración");
   }
@@ -24,7 +34,7 @@ export async function saveConfig(config, token) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(config),
   });
@@ -32,12 +42,13 @@ export async function saveConfig(config, token) {
   return res.json();
 }
 
-// --- Valores por defecto (reusables) ---
 const DEFAULT_CONFIG = {
   botName: "uChatBot",
   iconUrl: "https://novau.io/wp-content/uploads/2025/04/U.png",
   language: "en",
   context: "",
+  iconWidth: "100",
+  iconHeight: "100",
   colors: {
     headerBg: "#ea3103",
     headerText: "#ffffff",
@@ -50,8 +61,20 @@ const DEFAULT_CONFIG = {
     inputBorder: "#ddd",
     inputWrapperBg: "#f9f9f9",
     privacyBg: "#f9f9f9",
-    privacyText: "#666"
-  }
+    privacyText: "#666",
+  },
+  tags: {
+    tag1_text_es: "",
+    tag1_text_en: "",
+    tag2_text_es: "",
+    tag2_text_en: "",
+    tag3_text_es: "",
+    tag3_text_en: "",
+    tag4_text: "",
+    tag4_url: "",
+    social_url: "",
+  },
+  privacyPolicyUrl: "",
 };
 
 export default function ConfigPanel() {
@@ -59,9 +82,8 @@ export default function ConfigPanel() {
   const { visualConfig, setVisualConfig } = useVisualConfig();
   const [formData, setFormData] = useState(DEFAULT_CONFIG);
   const [loading, setLoading] = useState(true);
-  const [isFirstConfig, setIsFirstConfig] = useState(false); // UX flag para mostrar mensaje especial
+  const [isFirstConfig, setIsFirstConfig] = useState(false);
 
-  // Cargar config real al montar (si hay token)
   useEffect(() => {
     if (!token) {
       setLoading(false);
@@ -71,7 +93,6 @@ export default function ConfigPanel() {
     getConfig(token)
       .then((data) => {
         if (!data || Object.keys(data).length === 0 || data.error) {
-          // Primera vez: backend responde null/{} o error
           setFormData(DEFAULT_CONFIG);
           setVisualConfig(DEFAULT_CONFIG);
           setIsFirstConfig(true);
@@ -82,38 +103,44 @@ export default function ConfigPanel() {
         }
         setLoading(false);
       })
-      .catch((e) => {
-        // Error de red u otro, asumimos que es primera vez (muestra defaults)
+      .catch(() => {
         setFormData(DEFAULT_CONFIG);
         setVisualConfig(DEFAULT_CONFIG);
         setIsFirstConfig(true);
         setLoading(false);
       });
-    // eslint-disable-next-line
-  }, [token]);
+  }, [token, setVisualConfig]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name.startsWith("color_")) {
-      const colorKey = name.replace("color_", "");
+  const handleChange = (field, value) => {
+    if (field.startsWith("color_")) {
+      const colorKey = field.replace("color_", "");
       setFormData((prev) => ({
         ...prev,
-        colors: { ...prev.colors, [colorKey]: value }
+        colors: { ...prev.colors, [colorKey]: value },
+      }));
+    } else if (field.startsWith("tags.")) {
+      const tagKey = field.replace("tags.", "");
+      setFormData((prev) => ({
+        ...prev,
+        tags: { ...prev.tags, [tagKey]: value },
       }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     if (!token) {
       alert("No tienes token, inicia sesión de nuevo");
       return;
     }
     try {
       await saveConfig(formData, token);
-      setVisualConfig(formData); // Refleja el cambio en el chat
+      setVisualConfig(formData);
       setIsFirstConfig(false);
       alert("Configuración guardada y actualizada en el chatbot.");
     } catch (error) {
@@ -123,78 +150,207 @@ export default function ConfigPanel() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold">Configuración del Chatbot</h1>
-        <p>Cargando configuración…</p>
-      </div>
+      <Page title="Configuración del Chatbot">
+        <Layout>
+          <Layout.Section>
+            <div style={{ padding: "24px" }}>
+              <h1 style={{ fontSize: "24px", fontWeight: "bold" }}>
+                Configuración del Chatbot
+              </h1>
+              <p>Cargando configuración…</p>
+            </div>
+          </Layout.Section>
+        </Layout>
+      </Page>
     );
   }
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Configuración del Chatbot</h1>
-      {isFirstConfig && (
-        <div className="mb-4 p-3 rounded bg-yellow-100 border border-yellow-400 text-yellow-900">
-          Es la primera vez que configuras tu chatbot. Personaliza a tu gusto y guarda para comenzar 🚀
-        </div>
-      )}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          className="w-full p-2 border rounded"
-          name="botName"
-          value={formData.botName}
-          onChange={handleChange}
-          placeholder="Nombre del Bot"
-        />
-        <input
-          className="w-full p-2 border rounded"
-          name="iconUrl"
-          value={formData.iconUrl}
-          onChange={handleChange}
-          placeholder="URL del Icono"
-        />
-        <select
-          name="language"
-          value={formData.language}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
+    <Page title="Configuración del Chatbot">
+      <Layout>
+        <Layout.Section>
+          <div style={{ padding: "24px" }}>
+            <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "16px" }}>
+              Configuración del Chatbot
+            </h1>
+
+            {isFirstConfig && (
+              <div
+                style={{
+                  marginBottom: "16px",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  backgroundColor: "#fef3c7",
+                  border: "1px solid #fcd34d",
+                  color: "#78350f",
+                }}
+              >
+                Es la primera vez que configuras tu chatbot. Personaliza a tu gusto y guarda para comenzar 🚀
+              </div>
+            )}
+          </div>
+        </Layout.Section>
+
+        <Layout.AnnotatedSection
+          title="General"
+          description="Información básica del chatbot y selección de idioma"
         >
-          <option value="en">Inglés</option>
-          <option value="es">Español</option>
-        </select>
-        <textarea
-          name="context"
-          className="w-full p-2 border rounded"
-          rows="3"
-          placeholder="Contexto del chatbot"
-          value={formData.context}
-          onChange={handleChange}
-        ></textarea>
-        <div className="grid grid-cols-2 gap-2">
-          {Object.entries(formData.colors).map(([key, val]) => (
-            <div key={key} className="flex items-center gap-2">
-              <label className="capitalize w-1/2">{key}</label>
-              <input
-                type="color"
-                name={`color_${key}`}
-                value={val}
-                onChange={handleChange}
-                className="w-1/2 h-8"
+          <Card sectioned>
+            <Form onSubmit={handleSubmit}>
+              <FormLayout>
+                <TextField
+                  label="Nombre del Bot"
+                  value={formData.botName}
+                  onChange={(value) => handleChange("botName", value)}
+                  autoComplete="off"
+                />
+                <Select
+                  label="Idioma"
+                  options={[
+                    { label: "Español", value: "es" },
+                    { label: "Inglés", value: "en" },
+                  ]}
+                  onChange={(value) => handleChange("language", value)}
+                  value={formData.language}
+                />
+                <TextField
+                  label="Contexto del chatbot"
+                  value={formData.context}
+                  multiline={3}
+                  onChange={(value) => handleChange("context", value)}
+                />
+              </FormLayout>
+            </Form>
+          </Card>
+        </Layout.AnnotatedSection>
+
+        <Layout.AnnotatedSection
+          title="Icono del Chatbot"
+          description="Sube o pega una URL para el icono del chatbot"
+        >
+          <Card sectioned>
+           
+              <Thumbnail
+                source={formData.iconUrl || "https://via.placeholder.com/100"}
+                size="large"
+                alt="Chatbot Icon"
               />
-            </div>
-          ))}
-        </div>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-500"
+              <FormLayout>
+                <TextField
+                  label="Icon URL"
+                  value={formData.iconUrl}
+                  onChange={(value) => handleChange("iconUrl", value)}
+                  autoComplete="off"
+                />
+                <TextField
+                  label="Ancho (px)"
+                  type="number"
+                  value={formData.iconWidth}
+                  onChange={(value) => handleChange("iconWidth", value)}
+                  autoComplete="off"
+                />
+                <TextField
+                  label="Alto (px)"
+                  type="number"
+                  value={formData.iconHeight}
+                  onChange={(value) => handleChange("iconHeight", value)}
+                  autoComplete="off"
+                />
+              </FormLayout>
+           
+          </Card>
+        </Layout.AnnotatedSection>
+
+        <Layout.AnnotatedSection
+          title="Colores del Chat"
+          description="Personaliza los colores de la apariencia del chatbot"
         >
-          Guardar configuración
-        </button>
-      </form>
-      <div className="p-6 space-y-4">
-        <h1 className="text-2xl font-bold">Debug JWT</h1>
-        <JwtDebug />
-      </div>
-    </div>
+          <Card sectioned>
+            <FormLayout>
+              {Object.entries(formData.colors).map(([key, val]) => (
+                <TextField
+                  key={key}
+                  label={key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase())}
+                  type="color"
+                  name={`color_${key}`}
+                  value={val} 
+                  onChange={(value) => handleChange(`color_${key}`, value)}
+                />
+              ))}
+            </FormLayout>
+          </Card>
+        </Layout.AnnotatedSection>
+
+        <Layout.AnnotatedSection title="Tags y Enlaces">
+          <Card sectioned>
+            <FormLayout>
+              {["tag1", "tag2", "tag3"].map((tag) => (
+                <FormLayout.Group key={tag}>
+                  <TextField
+                    label={`${tag.toUpperCase()} (ES)`}
+                    value={formData.tags?.[`${tag}_text_es`] || ""}
+                    onChange={(value) => handleChange(`tags.${tag}_text_es`, value)}
+                    autoComplete="off"
+                  />
+                  <TextField
+                    label={`${tag.toUpperCase()} (EN)`}
+                    value={formData.tags?.[`${tag}_text_en`] || ""}
+                    onChange={(value) => handleChange(`tags.${tag}_text_en`, value)}
+                    autoComplete="off"
+                  />
+                </FormLayout.Group>
+              ))}
+              <TextField
+                label="Nombre Red Social"
+                // value={formData.tags.tag4_text || ""}
+                // onChange={(value) => handleChange("tags.tag4_text", value)}
+                autoComplete="off"
+              />
+              <TextField
+                label="URL Red Social"
+                // value={formData.tags.tag4_url || ""}
+                // onChange={(value) => handleChange("tags.tag4_url", value)}
+                autoComplete="off"
+              />
+              <TextField
+                label="Icono Social"
+                // value={formData.tags.social_url || ""}
+                // onChange={(value) => handleChange("tags.social_url", value)}
+                autoComplete="off"
+              />
+            </FormLayout>
+          </Card>
+        </Layout.AnnotatedSection>
+
+        <Layout.AnnotatedSection title="Política de Privacidad">
+          <Card sectioned>
+            <TextField
+              label="URL Política de Privacidad"
+              type="url"
+              value={formData.privacyPolicyUrl}
+              onChange={(value) => handleChange("privacyPolicyUrl", value)}
+              autoComplete="off"
+            />
+          </Card>
+        </Layout.AnnotatedSection>
+
+        <Layout.Section>
+          <div style={{ padding: "24px", display: "flex", justifyContent: "center" }}>
+            <div style={{ width: "220px" }}>
+              <Button primary fullWidth onClick={handleSubmit}>
+                Guardar configuración
+              </Button>
+            </div>
+          </div>
+        </Layout.Section>
+
+        <Layout.Section>
+          <div style={{ padding: "24px" }}>
+            <h2 style={{ fontSize: "20px", fontWeight: "bold" }}>Debug JWT</h2>
+            <JwtDebug />
+          </div>
+        </Layout.Section>
+      </Layout>
+    </Page>
   );
 }
