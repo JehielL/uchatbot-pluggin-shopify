@@ -16,7 +16,8 @@
     "shopify": "shopify",
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
-    "vite": "vite"
+    "vite": "vite",
+     "build-widget": "vite build --config vite.widget.config.js"
   },
   "type": "module",
   "engines": {
@@ -33,10 +34,11 @@
     "@shopify/polaris": "^12.27.0",
     "@shopify/shopify-app-remix": "^3.7.0",
     "@shopify/shopify-app-session-storage-prisma": "^6.0.0",
+    "@vitejs/plugin-react": "^4.5.1",
     "isbot": "^5.1.0",
     "prisma": "^6.2.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "vite-tsconfig-paths": "^5.0.1"
   },
   "devDependencies": {
@@ -51,7 +53,7 @@
     "eslint-config-prettier": "^10.0.1",
     "prettier": "^3.2.4",
     "typescript": "^5.2.2",
-    "vite": "^6.2.2"
+    "vite": "^6.3.5"
   },
   "workspaces": [
     "extensions/*"
@@ -71,5 +73,18 @@
     "@graphql-codegen/typescript-operations": "4.5.0",
     "minimatch": "9.0.5"
   },
-  "author": "Alex"
+  "author": "Alex",
+  "version": "1.0.0",
+  "description": "This is a template for building a [Shopify app](https://shopify.dev/docs/apps/getting-started) using the [Remix](https://remix.run) framework.",
+  "main": ".graphqlrc.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JehielL/uchatbot-pluggin-shopify.git"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JehielL/uchatbot-pluggin-shopify/issues"
+  },
+  "homepage": "https://github.com/JehielL/uchatbot-pluggin-shopify#readme"
 }
