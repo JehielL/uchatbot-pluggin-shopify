@@ -5,7 +5,7 @@ import { AppProvider as BridgeAppProvider } from "@shopify/shopify-app-remix/rea
 import { NavMenu } from "@shopify/app-bridge-react";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import { authenticate } from "../shopify.server";
-
+import JwtDebug from "./JwtDebug"; 
 // Traducción mínima para Polaris
 const i18n = {
   Polaris: {
@@ -48,7 +48,10 @@ export default function App() {
           <Link to="/wizard">Asistente de Configuración</Link>
           <Link to="/dashboards">Dashboard</Link>
           <Link to="/leads">Dashboard</Link>
+          <Link to="/contextosmanager">Dashboard</Link>
+          
         </NavMenu>
+        <JwtDebug />
         <Outlet />
       </BridgeAppProvider>
     </PolarisAppProvider>
