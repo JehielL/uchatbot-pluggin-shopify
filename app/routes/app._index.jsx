@@ -113,12 +113,13 @@ export default function Dashboards() {
     return;
   }
 
-  const siteUrl = window.location.origin; // Obtener el dominio actual (como en WordPress)
-  console.log("🌐 Scraping site:", siteUrl);
+  const urlParams = new URLSearchParams(window.location.search);
+  const shopDomain = urlParams.get("shop");
+  console.log("🌐 Scraping site:", shopDomain);
   console.log("🔑 Using token:", token);
   try {
     // 1. Scrape del sitio
-    const res = await fetch(`https://desarrollosfutura.com:5000/scraper/scrape?url=${siteUrl}`, {
+    const res = await fetch(`https://desarrollosfutura.com:5000/scraper/scrape?url=${shopDomain}`, {
         method: "GET",
         headers: { 
           Authorization: `Bearer ${token}` 
