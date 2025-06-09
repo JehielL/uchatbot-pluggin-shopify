@@ -1,47 +1,66 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useVisualConfig } from "./VisualConfigContext";
+import { useJwt } from "./JwtProvider";
 
-// Inicialización desde el window (Shopify embedded)
-// Puedes pasar estas props desde el parent si prefieres, pero así es plug & play
-const config = window.shopifyChatbotConfig || {};
-const apiKey = config.api_key;
-const nombreChatBot = config.name || "uChatBot";
-const iconUrl = config.icon || "";
-const colors = config.colors || {};
-const privacyPolicyUrl = config.privacyPolicyUrl || "#";
-const tags = config.tags || { es: {}, en: {} };
-import { useJwt } from "./routes/JwtProvider";
 
-const translations = {
-  es: {
-    placeholder: 'Escribe tu mensaje...',
-    privacyPolicy: 'Al chatear aceptas nuestra',
-    privacyPolicyText: 'Política de Privacidad',
-    welcomeMessage: `¡Hola! Soy ${nombreChatBot} 🤖, ¿en qué puedo ayudarte hoy?`,
-    messages: [
-      `¡Hola! Soy ${nombreChatBot} 🤖, estoy para ayudarte`,
-      "¿Necesitas ayuda? Escríbeme 👀",
-      "Pregunta lo que quieras, estoy aquí para ayudarte 😉"
-    ],
-    cart: '🛒 Mi Carrito'
-  },
-  en: {
-    placeholder: 'Type your message...',
-    privacyPolicy: 'By chatting, you accept our',
-    privacyPolicyText: 'Privacy Policy',
-    welcomeMessage: `Hello! I'm ${nombreChatBot} 🤖, how can I assist you today?`,
-    messages: [
-      `Hello! I'm ${nombreChatBot} 🤖, here to help`,
-      "Need help? Write to me 👀",
-      "Ask me anything, I'm here to assist you 😉"
-    ],
-    cart: '🛒 My Cart'
+
+async function fetchConfig({ apiBase, jwtToken }) {
+  try {
+    const response = await fetch(`${apiBase}/get_config`, {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) throw new Error("No se pudo cargar la configuración");
+    return await response.json();
+  } catch (e) {
+    // Si falla, devuelve null
+    return null;
   }
+}
+
+// Visual loader
+function ChatbotLoader({ apiBase, jwtToken }) {
+  const [visualConfig, setVisualConfig] = useState(null);
+
+  useEffect(() => {
+    fetchConfig({ apiBase, jwtToken }).then((cfg) => {
+      setVisualConfig(cfg);
+    });
+  }, [apiBase, jwtToken]);
+
+  // Si todavía no hay config, renderizamos null o spinner
+  if (!visualConfig) return null; // O un spinner
+
+  return <Chatbot visualConfig={visualConfig} jwtToken={jwtToken} />;
+}
+
+// Monta el widget globalmente (se llamará desde ScriptTag)
+// Cambia esto en widget-chatbot.js (público, compilado)
+window.renderChatbotWidget = function ({ apiBase, shopDomain }) {
+  let container = document.getElementById("chatbot-root");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "chatbot-root";
+    document.body.appendChild(container);
+  }
+  // Obtener el JWT de invitado
+  fetch(`${apiBase}/guest_token?shop=${shopDomain}`)
+    .then(res => res.json())
+    .then(data => {
+      const jwtToken = data.token;
+      ReactDOM.createRoot(container).render(
+        <ChatbotLoader apiBase={apiBase} jwtToken={jwtToken} />
+      );
+    });
 };
 
-// ===============================
-//   HELPERS
-// ===============================
 
+
+// =======================
+//   HELPERS
+// =======================
 function applyTextFormatting(text) {
   text = text.replace(/\*\*(.*?)\*\*/g, '$1');
   const enumerationPattern = /(\d+\.\s.*?)(?=(\d+\.\s|$))/g;
@@ -62,26 +81,65 @@ function generateUUID() {
   );
 }
 
-// ===============================
+// =======================
 //   COMPONENT
-// ===============================
+// =======================
 
 export default function Chatbot() {
-  // ---- State
   const { token: jwtToken } = useJwt();
+  const { visualConfig } = useVisualConfig();
+
+  // ---- Configuración visual y de branding desde el contexto
+  const apiKey = visualConfig.apiKey || "";
+  const nombreChatBot = visualConfig.botName || "uChatBot";
+  const iconUrl = visualConfig.iconUrl || "";
+  const colors = visualConfig.colors || {};
+  const privacyPolicyUrl = visualConfig.privacyPolicyUrl || "#";
+  const languageDefault = visualConfig.language || "es";
+
+  // ---- Traducciones dinámicas
+  const translations = {
+    es: {
+      placeholder: 'Escribe tu mensaje...',
+      privacyPolicy: 'Al chatear aceptas nuestra',
+      privacyPolicyText: 'Política de Privacidad',
+      welcomeMessage: `¡Hola! Soy ${nombreChatBot} 🤖, ¿en qué puedo ayudarte hoy?`,
+      messages: [
+        `¡Hola! Soy ${nombreChatBot} 🤖, estoy para ayudarte`,
+        "¿Necesitas ayuda? Escríbeme 👀",
+        "Pregunta lo que quieras, estoy aquí para ayudarte 😉"
+      ],
+      cart: '🛒 Mi Carrito'
+    },
+    en: {
+      placeholder: 'Type your message...',
+      privacyPolicy: 'By chatting, you accept our',
+      privacyPolicyText: 'Privacy Policy',
+      welcomeMessage: `Hello! I'm ${nombreChatBot} 🤖, how can I assist you today?`,
+      messages: [
+        `Hello! I'm ${nombreChatBot} 🤖, here to help`,
+        "Need help? Write to me 👀",
+        "Ask me anything, I'm here to assist you 😉"
+      ],
+      cart: '🛒 My Cart'
+    }
+  };
+
+  // ---- State
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState(localStorage.getItem("session_id") || generateUUID());
   const [activeContext, setActiveContext] = useState(localStorage.getItem("active_context") || "example-context");
-  const [language, setLanguage] = useState(localStorage.getItem("user_language") || "es");
+  const [language, setLanguage] = useState(localStorage.getItem("user_language") || languageDefault);
   const [speechBubble, setSpeechBubble] = useState("");
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const [loading, setLoading] = useState(false);
   const chatContainerRef = useRef(null);
 
-  // ---- Effects
+  // =======================
+  //   EFFECTS
+  // =======================
 
-  // Load historial and context on mount
   useEffect(() => {
     localStorage.setItem("session_id", sessionId);
     localStorage.setItem("active_context", activeContext);
@@ -89,7 +147,6 @@ export default function Chatbot() {
     // eslint-disable-next-line
   }, []);
 
-  // Bubble suggestions timer
   useEffect(() => {
     const timer = setInterval(() => {
       const msgs = translations[language].messages;
@@ -98,14 +155,13 @@ export default function Chatbot() {
       setTimeout(() => setShowSpeechBubble(false), 3000);
     }, 10000);
     return () => clearInterval(timer);
-  }, [language]);
+  }, [language, nombreChatBot]);
 
-  // Autoscroll on messages update
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Apply style/colors dynamically (Shopify/Polaris theme safe)
+  // Aplicar estilos custom según config visual
   useEffect(() => {
     const style = document.createElement("style");
     style.id = "chatbot-custom-style";
@@ -122,7 +178,9 @@ export default function Chatbot() {
     return () => { if (document.getElementById("chatbot-custom-style")) document.getElementById("chatbot-custom-style").remove(); };
   }, [colors]);
 
-  // ---- LOGIC
+  // =======================
+  //   LOGIC
+  // =======================
 
   async function updateActiveContext() {
     try {
@@ -141,8 +199,7 @@ export default function Chatbot() {
     try {
       const response = await fetch('https://desarrollosfutura.com:5001/chat/get_contexto', {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${jwtToken}`
-, 'Content-Type': 'application/json' }
+        headers: { 'Authorization': `Bearer ${jwtToken}`, 'Content-Type': 'application/json' }
       });
       if (!response.ok) throw new Error();
       const data = await response.json();
@@ -161,7 +218,6 @@ export default function Chatbot() {
           "Content-Type": "application/json",
           "x-api-key": apiKey,
           'Authorization': `Bearer ${jwtToken}`
-
         }
       });
       // No hace falta parsear, solo para mantener lógica
@@ -187,7 +243,6 @@ export default function Chatbot() {
           'x-api-key': apiKey,
           'x-session-id': sessionId,
           'Authorization': `Bearer ${jwtToken}`
-
         },
         credentials: 'include'
       });
@@ -236,7 +291,6 @@ export default function Chatbot() {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
           'Authorization': `Bearer ${jwtToken}`
-
         },
         body: JSON.stringify({ message: msg }),
         credentials: 'include'
@@ -311,9 +365,10 @@ export default function Chatbot() {
     resetChat();
   }
 
-  // ===============================
+  // =======================
   //   JSX
-  // ===============================
+  // =======================
+
   return (
     <div className="chatbot-card-container" style={{ borderRadius: 16, maxWidth: 420, margin: "auto" }}>
       {/* Header */}
@@ -402,4 +457,33 @@ export default function Chatbot() {
       </div>
     </div>
   );
+}
+
+
+if (typeof window !== 'undefined') {
+  window.renderChatbotWidget = function ({ apiBase, shopDomain }) {
+    let container = document.getElementById("chatbot-root");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "chatbot-root";
+      document.body.appendChild(container);
+    }
+    fetch(`${apiBase}/guest_token?shop=${shopDomain}`)
+      .then(res => res.json())
+      .then(data => {
+        const jwtToken = data.token;
+        ReactDOM.createRoot(container).render(
+          React.createElement(ChatbotLoader, { apiBase, jwtToken })
+        );
+      });
+  };
+
+  // Autoinicializa al cargar si es Storefront
+  const shopDomain = window.Shopify?.shop;
+  if (shopDomain) {
+    window.renderChatbotWidget({
+      apiBase: "https://desarrollosfutura.com:5001/chat",
+      shopDomain
+    });
+  }
 }

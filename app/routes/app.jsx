@@ -47,8 +47,9 @@ export default function App() {
           <Link to="/config">Configuración del Chatbot</Link>
           <Link to="/wizard">Asistente de Configuración</Link>
           <Link to="/dashboards">Dashboard</Link>
-          <Link to="/leads">Dashboard</Link>
-          <Link to="/contextosmanager">Dashboard</Link>
+          <Link to="/leads">Mis Leads</Link>
+          <Link to="/contextosmanager">Configurar Contextos</Link>
+          <Link to="/ToggleChatbot">Activar Chatbot</Link>
           
         </NavMenu>
         <JwtDebug />
