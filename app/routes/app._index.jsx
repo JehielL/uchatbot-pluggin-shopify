@@ -301,7 +301,7 @@ export default function Dashboards() {
             </Button>
             <Button url="/app/personalizacion">Customization</Button>
             <Button url="/app/seccion">Activate/Deactivate</Button>
-            <Button url="/app/historial">Chatbot History</Button>
+            <Button url="/history">Chatbot History</Button>
           </BlockStack>
         </Card>
 

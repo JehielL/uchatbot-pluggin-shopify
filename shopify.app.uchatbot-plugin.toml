@@ -3,7 +3,7 @@
 client_id = "19b0cd62b5688f3d133ddad75d62b58c"
 name = "uchatbot-plugin"
 handle = "uchatbot-plugin"
-application_url = "https://inform-desktop-alive-notified.trycloudflare.com"
+application_url = "https://announcement-specialists-cgi-complaints.trycloudflare.com"
 embedded = true
 
 [build]
@@ -19,9 +19,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://inform-desktop-alive-notified.trycloudflare.com/auth/callback",
-  "https://inform-desktop-alive-notified.trycloudflare.com/auth/shopify/callback",
-  "https://inform-desktop-alive-notified.trycloudflare.com/api/auth/callback"
+  "https://announcement-specialists-cgi-complaints.trycloudflare.com/auth/callback",
+  "https://announcement-specialists-cgi-complaints.trycloudflare.com/auth/shopify/callback",
+  "https://announcement-specialists-cgi-complaints.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
