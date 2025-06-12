@@ -11,7 +11,7 @@ import esTranslations from "@shopify/polaris/locales/es.json";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 // Importa tus providers y componentes desde las rutas correctas
 import { VisualConfigProvider } from "../src/VisualConfigContext"; // Asegúrate de la ruta correcta
-import chatbotStyles from "../src/chatbot.css"; // Asegúrate de esta ruta
+import chatbotStyles from "../src/chatbot.css?url"; // Asegúrate de esta ruta
 import { JwtProvider } from "./routes/JwtProvider";
 import FloatingChatbot from "./routes/FloatingChatbot";
 

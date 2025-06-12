@@ -13,10 +13,12 @@ export default function Login() {
   // Detectar dominio SOLO en cliente
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Adapta esto a tu método real de obtener el shop
-      setShopDomain(window.Shopify?.shop || "robota.store");
+      const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      const domain = isLocal ? "robota.store" : window.Shopify?.shop;
+      setShopDomain(domain);
     }
   }, []);
+
 
   // Si ya hay JWT global guardado para este shop, redirige a /wizard
   useEffect(() => {

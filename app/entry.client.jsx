@@ -2,7 +2,7 @@ import "./styles/chatbot.css";
 import React from "react";
 import { VisualConfigProvider } from "../src/VisualConfigContext";
 import { createRoot } from "react-dom/client";
-import Chatbot from "./routes/FloatingChatbot"; // o tu componente raíz real
+import Chatbot from "../src/chatbot";
 
 const container = document.getElementById("uchatbot-root-container");
 

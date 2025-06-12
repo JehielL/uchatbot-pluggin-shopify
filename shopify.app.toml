@@ -3,7 +3,7 @@
 client_id = "7baf4e7946b81bcfcd9a98c80ac4d605"
 name = "uchatbot-pluggin"
 handle = "uchatbot-pluggin"
-application_url = "https://sacred-lover-albuquerque-costa.trycloudflare.com"
+application_url = "https://oe-bracket-fewer-av.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,9 +27,9 @@ scopes = "write_products,write_script_tags"
 
 [auth]
 redirect_urls = [
-  "https://sacred-lover-albuquerque-costa.trycloudflare.com/auth/callback",
-  "https://sacred-lover-albuquerque-costa.trycloudflare.com/auth/shopify/callback",
-  "https://sacred-lover-albuquerque-costa.trycloudflare.com/api/auth/callback"
+  "https://oe-bracket-fewer-av.trycloudflare.com/auth/callback",
+  "https://oe-bracket-fewer-av.trycloudflare.com/auth/shopify/callback",
+  "https://oe-bracket-fewer-av.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
