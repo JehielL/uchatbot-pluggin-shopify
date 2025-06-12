@@ -2,12 +2,10 @@ import { vitePlugin as remix } from "@remix-run/dev";
 import { installGlobals } from "@remix-run/node";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import path from 'path'; // ¡Añadimos la importación del módulo 'path'!
 
 installGlobals({ nativeFetch: true });
 
-// Related: https://github.com/remix-run/remix/issues/2835#issuecomment-1144102176
-// Replace the HOST env var with SHOPIFY_APP_URL so that it doesn't break the remix server. The CLI will eventually
-// stop passing in HOST, so we can remove this workaround after the next major release.
 if (
   process.env.HOST &&
   (!process.env.SHOPIFY_APP_URL ||
@@ -46,8 +44,13 @@ export default defineConfig({
     port: Number(process.env.PORT || 3000),
     hmr: hmrConfig,
     fs: {
-      // See https://vitejs.dev/config/server-options.html#server-fs-allow for more information
-      allow: ["app", "node_modules"],
+      // Configuramos las carpetas que Vite tiene permitido servir en desarrollo
+      allow: [
+        path.resolve(__dirname, 'app'),
+        path.resolve(__dirname, 'node_modules'),
+        path.resolve(__dirname, 'src'), // <--- Permitimos la carpeta 'src'
+        path.resolve(__dirname, 'extensions'), // <--- Permitimos la carpeta 'extensions'
+      ],
     },
   },
   plugins: [
@@ -65,8 +68,20 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   build: {
+    outDir: 'extensions/chatbot-embed/assets',
+    emptyOutDir: true,
     assetsInlineLimit: 0,
+    rollupOptions: {
+      input: path.resolve(__dirname, 'app/entry.client.jsx'),
+      output: {
+        entryFileNames: 'entry.client.js',
+        assetFileNames: 'chatbot.css',
+        chunkFileNames: '[name].js'
+      }
+    }
+
   },
+
   optimizeDeps: {
     include: ["@shopify/app-bridge-react", "@shopify/polaris"],
   },

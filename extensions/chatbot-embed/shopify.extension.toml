@@ -1,0 +1,14 @@
+api_version = "2024-07"
+name = "Chatbot Global Embed"
+type = "theme_app_extension" # ¡CORREGIDO!
+
+# Configuración de build (importante para tus assets JS/CSS)
+[build]
+command = "npm run build" # Asegúrate de que este sea tu comando de build real (ej. "yarn build", "vite build")
+include_assets_from_build = true # Esto es crucial para que Shopify suba tus archivos JS y CSS
+
+[[blocks]]
+name = "Chatbot Script Injector"
+type = "app-embed"
+target = "body"
+template = "blocks/app-embed.liquid" # ¡CORREGIDO!

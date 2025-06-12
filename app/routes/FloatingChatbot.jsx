@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Chatbot from "./chatbot"; // O ajusta la ruta si está en otro sitio
+import Chatbot from '../../src/chatbot';
 import { useJwt } from "./JwtProvider"; // O ajusta la ruta si es necesario
 
 export default function FloatingChatbot() {

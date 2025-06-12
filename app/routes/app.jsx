@@ -50,7 +50,7 @@ export default function App() {
           <Link to="/leads">Mis Leads</Link>
           <Link to="/contextosmanager">Configurar Contextos</Link>
           <Link to="/ToggleChatbot">Activar Chatbot</Link>
-          
+          <Link to="/history">My ChatBot history</Link>
         </NavMenu>
         <JwtDebug />
         <Outlet />

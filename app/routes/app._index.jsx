@@ -103,52 +103,91 @@ export default function Dashboards() {
   };
 
   const handleScrape = async () => {
-    setScraping(true);
-    setScrapeResult(null);
-    setError("");
+  setScraping(true);
+  setScrapeResult(null);
+  setError("");
 
-    if (!token) {
-      setError("Not authenticated. Please login again.");
-      setScraping(false);
-      return;
-    }
-    const startTime = Date.now();
-    try {
-      const res = await fetch(
-        "https://desarrollosfutura.com:5001/scrape",
+  if (!token) {
+    setError("Not authenticated. Please login again.");
+    setScraping(false);
+    return;
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const shopDomain = urlParams.get("shop");
+  console.log("🌐 Scraping site:", shopDomain);
+  console.log("🔑 Using token:", token);
+  try {
+    // 1. Scrape del sitio
+    const res = await fetch(`https://desarrollosfutura.com:5000/scraper/scrape?url=${shopDomain}`, {
+        method: "GET",
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        },
+        
+      });
+
+    const scrapeBody = await res.text(); // respuesta puede no ser JSON
+    if (!res.ok) throw new Error(`Scraping failed: ${scrapeBody}`);
+
+    console.log("✅ Scrape result:", scrapeBody);
+
+    // 2. Obtener contextos
+    const contextsRes = await fetch(
+      "https://desarrollosfutura.com:5000/scraper/contextos",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const contextsData = await contextsRes.json();
+    const contextos = contextsData?.contextos ?? [];
+
+    // 3. Activar primer contexto (si existe)
+    let contextActivated = false;
+    if (contextos.length > 0 && contextos[0].archivo) {
+      const archivo = contextos[0].archivo;
+
+      const activateRes = await fetch(
+        "https://desarrollosfutura.com:5000/scraper/activar_contexto",
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({ archivo }),
         }
       );
-      const data = await res.json();
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-      if (res.ok) {
-        let html = `Website scraped successfully! (${elapsed} seconds)`;
-        if (data.contexts && data.contexts.length > 0) {
-          html += "\nAvailable Contexts:\n";
-          html += data.contexts
-            .map((ctx) => `${ctx.nombre} (${ctx.archivo})`)
-            .join("\n");
-        }
-        setScrapeResult({ success: true, message: html });
-      } else {
-        setScrapeResult({
-          success: false,
-          message: `Error: ${data.data} (${elapsed} seconds)`,
-        });
-      }
-    } catch (err) {
-      setScrapeResult({
-        success: false,
-        message: "Error occurred while scraping website",
-      });
+
+      const activateBody = await activateRes.text();
+      console.log("🔁 Activar contexto:", activateBody);
+
+      contextActivated = activateRes.ok;
     }
-    setScraping(false);
-  };
+
+    setScrapeResult({
+      success: true,
+      message: `✅ Website scraped and ${
+        contextActivated ? "context activated" : "no context activated"
+      } successfully.\n\nContextos:\n${contextos
+        .map((c) => `${c.nombre} (${c.archivo})`)
+        .join("\n")}`,
+    });
+  } catch (err) {
+    console.error("❌ Scrape error:", err);
+    setScrapeResult({
+      success: false,
+      message: err.message || "Error occurred while scraping website",
+    });
+  }
+
+  setScraping(false);
+};
+
 
   return (
     <Page title="uChatBot Dashboard">
@@ -262,7 +301,7 @@ export default function Dashboards() {
             </Button>
             <Button url="/app/personalizacion">Customization</Button>
             <Button url="/app/seccion">Activate/Deactivate</Button>
-            <Button url="/app/historial">Chatbot History</Button>
+            <Button url="/history">Chatbot History</Button>
           </BlockStack>
         </Card>
 

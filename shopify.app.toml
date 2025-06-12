@@ -1,16 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-<<<<<<< HEAD
 client_id = "7baf4e7946b81bcfcd9a98c80ac4d605"
 name = "uchatbot-pluggin"
 handle = "uchatbot-pluggin"
-application_url = "https://energy-abu-dealing-cleanup.trycloudflare.com"
-=======
-client_id = "8d0a28343fb384a159847610d6656557"
-name = "uchatbot"
-handle = "uchatbot"
-application_url = "https://checklist-file-meal-pixel.trycloudflare.com"
->>>>>>> bc38db9ce04bd219a70dc27b0d1f1f35f8143699
+application_url = "https://sacred-lover-albuquerque-costa.trycloudflare.com"
 embedded = true
 
 [build]
@@ -34,16 +27,20 @@ scopes = "write_products,write_script_tags"
 
 [auth]
 redirect_urls = [
-<<<<<<< HEAD
-  "https://energy-abu-dealing-cleanup.trycloudflare.com/auth/callback",
-  "https://energy-abu-dealing-cleanup.trycloudflare.com/auth/shopify/callback",
-  "https://energy-abu-dealing-cleanup.trycloudflare.com/api/auth/callback"
-=======
-  "https://checklist-file-meal-pixel.trycloudflare.com/auth/callback",
-  "https://checklist-file-meal-pixel.trycloudflare.com/auth/shopify/callback",
-  "https://checklist-file-meal-pixel.trycloudflare.com/api/auth/callback"
->>>>>>> bc38db9ce04bd219a70dc27b0d1f1f35f8143699
+  "https://sacred-lover-albuquerque-costa.trycloudflare.com/auth/callback",
+  "https://sacred-lover-albuquerque-costa.trycloudflare.com/auth/shopify/callback",
+  "https://sacred-lover-albuquerque-costa.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
 embedded = false
+
+[[extensions]]
+name = "Chatbot uChatBot"
+type = "ui_extension"
+handle = "uchatbot-widget"
+
+  [extensions.ui_extension]
+  surface = "online_store"
+  renderer = "react"
+  source = "extensions/chatbot-embed/src/index.jsx"

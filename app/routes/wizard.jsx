@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Page, Card, Form, FormLayout, TextField, Select, Button, Banner, ProgressBar } from "@shopify/polaris";
 import { useNavigate } from "@remix-run/react";
 import { useJwt } from "./JwtProvider";
-import { useVisualConfig } from "./VisualConfigContext";
+import { useVisualConfig } from "../../src/VisualConfigContext";
 import { saveConfig as saveConfigBackend } from "./config";
 
 const DEFAULT_COLORS = {

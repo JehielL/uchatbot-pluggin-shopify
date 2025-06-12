@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { fetchShopToken } from "./auth";
+import { fetchShopToken } from '../app/routes/auth';
 
 const JwtContext = createContext({ token: null, refresh: () => {} });
 

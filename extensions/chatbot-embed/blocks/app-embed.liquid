@@ -1,0 +1,150 @@
+{% comment %}
+  Este archivo injecta el chatbot como App Embed en el tema de Shopify.
+{% endcomment %}
+
+<div id="uchatbot-root-container"
+     data-api-key="{{ block.settings.api_key }}"
+     data-bot-name="{{ block.settings.bot_name }}"
+     data-icon-url="{{ block.settings.icon_url }}"
+     data-privacy-policy-url="{{ block.settings.privacy_policy_url }}"
+     data-language="{{ block.settings.language }}"
+     data-colors-header-bg="{{ block.settings.colors_header_bg }}"
+     data-colors-header-text="{{ block.settings.colors_header_text }}"
+     data-colors-chat-bg="{{ block.settings.colors_chat_bg }}"
+     data-colors-chat-text="{{ block.settings.colors_chat_text }}"
+     data-colors-button-bg="{{ block.settings.colors_button_bg }}"
+     data-colors-button-text="{{ block.settings.colors_button_text }}"
+     data-colors-input-bg="{{ block.settings.colors_input_bg }}"
+     data-colors-input-text="{{ block.settings.colors_input_text }}"
+     data-colors-input-border="{{ block.settings.colors_input_border }}"
+     data-colors-input-wrapper-bg="{{ block.settings.colors_input_wrapper_bg }}"
+     data-colors-privacy-bg="{{ block.settings.colors_privacy_bg }}"
+     data-colors-privacy-text="{{ block.settings.colors_privacy_text }}">
+</div>
+
+<link rel="stylesheet" href="{{ 'chatbot.css' | asset_url }}">
+<script src="{{ 'entry.client.js' | asset_url }}" type="module" defer></script>
+
+{% schema %}
+{
+  "name": "Chatbot Embed",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_chatbot",
+      "label": "Habilitar Chatbot",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "api_key",
+      "label": "API Key del Chatbot"
+    },
+    {
+      "type": "text",
+      "id": "bot_name",
+      "label": "Nombre del Chatbot",
+      "default": "uChatBot"
+    },
+    {
+      "type": "url",
+      "id": "icon_url",
+      "label": "URL del Icono del Chatbot"
+      // Se eliminó el atributo "default" aquí
+    },
+    {
+      "type": "url",
+      "id": "privacy_policy_url",
+      "label": "URL Política de Privacidad"
+      // Se eliminó el atributo "default" aquí
+    },
+    {
+      "type": "select",
+      "id": "language",
+      "label": "Idioma por defecto",
+      "options": [
+        { "value": "es", "label": "Español" },
+        { "value": "en", "label": "Inglés" }
+      ],
+      "default": "es"
+    },
+    {
+      "type": "header",
+      "content": "Colores del Chatbot"
+    },
+    {
+      "type": "color",
+      "id": "colors_header_bg",
+      "label": "Fondo de Cabecera",
+      "default": "#ea3103"
+    },
+    {
+      "type": "color",
+      "id": "colors_header_text",
+      "label": "Texto de Cabecera",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "colors_chat_bg",
+      "label": "Fondo del Chat",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "colors_chat_text",
+      "label": "Texto del Chat",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "colors_button_bg",
+      "label": "Fondo de Botón",
+      "default": "#ea3103"
+    },
+    {
+      "type": "color",
+      "id": "colors_button_text",
+      "label": "Texto de Botón",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "colors_input_bg",
+      "label": "Fondo de Entrada",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "colors_input_text",
+      "label": "Texto de Entrada",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "colors_input_border",
+      "label": "Borde de Entrada",
+      "default": "#dddddd"
+    },
+    {
+      "type": "color",
+      "id": "colors_input_wrapper_bg",
+      "label": "Fondo Envoltorio Entrada",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "colors_privacy_bg",
+      "label": "Fondo Política Privacidad",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "colors_privacy_text",
+      "label": "Texto Política Privacidad",
+      "default": "#666666"
+    }
+  ]
+}
+{% endschema %}

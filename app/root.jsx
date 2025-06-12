@@ -1,3 +1,4 @@
+// app/root.jsx (ACTUALIZADO)
 import {
   Links,
   Meta,
@@ -8,17 +9,16 @@ import {
 import { AppProvider } from "@shopify/polaris";
 import esTranslations from "@shopify/polaris/locales/es.json";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
-import { VisualConfigProvider } from "./routes/VisualConfigContext";
-import chatbotStyles from "/chatbot.css?url";
-
+// Importa tus providers y componentes desde las rutas correctas
+import { VisualConfigProvider } from "../src/VisualConfigContext"; // Asegúrate de la ruta correcta
+import chatbotStyles from "../src/chatbot.css"; // Asegúrate de esta ruta
 import { JwtProvider } from "./routes/JwtProvider";
-import FloatingChatbot from "./routes/FloatingChatbot"; // <-- importa el nuevo componente
+import FloatingChatbot from "./routes/FloatingChatbot";
 
 export function links() {
   return [
     { rel: "stylesheet", href: polarisStyles },
     { rel: "stylesheet", href: chatbotStyles },
-    // Otros estilos si los tienes
   ];
 }
 
@@ -37,8 +37,8 @@ export default function App() {
         <Links />
       </head>
       <body>
-        {/* JwtProvider envuelve TODO tu contenido */}
         <JwtProvider>
+          {/* Ya no pasamos initialConfig aquí, el Provider lo lee internamente */}
           <VisualConfigProvider>
             <AppProvider i18n={esTranslations}>
               <Outlet />

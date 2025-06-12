@@ -1,8 +1,13 @@
 {
   "name": "uchatbot-pluggin",
   "private": true,
+  "version": "1.0.0",
+  "author": "Alex",
+  "description": "Plugin de uChatBot para Shopify usando Remix",
+  "main": ".graphqlrc.js",
   "scripts": {
     "build": "remix vite:build",
+     "build-chatbot-assets": "vite build --config vite.assets.config.js",
     "dev": "shopify app dev",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
@@ -17,7 +22,7 @@
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
     "vite": "vite",
-     "build-widget": "vite build --config vite.widget.config.js"
+    "build-widget": "vite build --config vite.widget.config.js"
   },
   "type": "module",
   "engines": {
@@ -34,6 +39,7 @@
     "@shopify/polaris": "^12.27.0",
     "@shopify/shopify-app-remix": "^3.7.0",
     "@shopify/shopify-app-session-storage-prisma": "^6.0.0",
+    "@shopify/ui-extensions-react": "^2025.4.0",
     "@vitejs/plugin-react": "^4.5.1",
     "isbot": "^5.1.0",
     "prisma": "^6.2.1",
@@ -73,16 +79,10 @@
     "@graphql-codegen/typescript-operations": "4.5.0",
     "minimatch": "9.0.5"
   },
-  "author": "Alex",
-  "version": "1.0.0",
-  "description": "This is a template for building a [Shopify app](https://shopify.dev/docs/apps/getting-started) using the [Remix](https://remix.run) framework.",
-  "main": ".graphqlrc.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JehielL/uchatbot-pluggin-shopify.git"
   },
-  "keywords": [],
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/JehielL/uchatbot-pluggin-shopify/issues"
   },

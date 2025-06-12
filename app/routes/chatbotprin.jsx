@@ -1,61 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useVisualConfig } from "./VisualConfigContext";
+import { useVisualConfig } from "../../src/VisualConfigContext";
 import { useJwt } from "./JwtProvider";
-
-
-
-async function fetchConfig({ apiBase, jwtToken }) {
-  try {
-    const response = await fetch(`${apiBase}/get_config`, {
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-    if (!response.ok) throw new Error("No se pudo cargar la configuración");
-    return await response.json();
-  } catch (e) {
-    // Si falla, devuelve null
-    return null;
-  }
-}
-
-// Visual loader
-function ChatbotLoader({ apiBase, jwtToken }) {
-  const [visualConfig, setVisualConfig] = useState(null);
-
-  useEffect(() => {
-    fetchConfig({ apiBase, jwtToken }).then((cfg) => {
-      setVisualConfig(cfg);
-    });
-  }, [apiBase, jwtToken]);
-
-  // Si todavía no hay config, renderizamos null o spinner
-  if (!visualConfig) return null; // O un spinner
-
-  return <Chatbot visualConfig={visualConfig} jwtToken={jwtToken} />;
-}
-
-// Monta el widget globalmente (se llamará desde ScriptTag)
-// Cambia esto en widget-chatbot.js (público, compilado)
-window.renderChatbotWidget = function ({ apiBase, shopDomain }) {
-  let container = document.getElementById("chatbot-root");
-  if (!container) {
-    container = document.createElement("div");
-    container.id = "chatbot-root";
-    document.body.appendChild(container);
-  }
-  // Obtener el JWT de invitado
-  fetch(`${apiBase}/guest_token?shop=${shopDomain}`)
-    .then(res => res.json())
-    .then(data => {
-      const jwtToken = data.token;
-      ReactDOM.createRoot(container).render(
-        <ChatbotLoader apiBase={apiBase} jwtToken={jwtToken} />
-      );
-    });
-};
-
 
 
 // =======================
@@ -109,6 +54,11 @@ export default function Chatbot() {
         "¿Necesitas ayuda? Escríbeme 👀",
         "Pregunta lo que quieras, estoy aquí para ayudarte 😉"
       ],
+      quickReplies: [
+        "Saber precios",
+        "Información general",
+        "Ayuda"
+      ],
       cart: '🛒 Mi Carrito'
     },
     en: {
@@ -120,6 +70,11 @@ export default function Chatbot() {
         `Hello! I'm ${nombreChatBot} 🤖, here to help`,
         "Need help? Write to me 👀",
         "Ask me anything, I'm here to assist you 😉"
+      ],
+      quickReplies: [
+        "Know prices",
+        "General information",
+        "Help"
       ],
       cart: '🛒 My Cart'
     }
@@ -177,6 +132,12 @@ export default function Chatbot() {
     document.head.appendChild(style);
     return () => { if (document.getElementById("chatbot-custom-style")) document.getElementById("chatbot-custom-style").remove(); };
   }, [colors]);
+
+  useEffect(() => {
+    // Manejar focus cuando se abre el chat
+    const input = document.getElementById('message-input');
+    if (input) input.focus();
+  }, []);
 
   // =======================
   //   LOGIC
@@ -370,20 +331,34 @@ export default function Chatbot() {
   // =======================
 
   return (
-    <div className="chatbot-card-container" style={{ borderRadius: 16, maxWidth: 420, margin: "auto" }}>
+    <div 
+      className="chatbot-card-container"
+      role="region"
+      aria-label="Chat con asistente virtual"
+    >
       {/* Header */}
-      <div className="chatbot-header flex items-center gap-2 p-2">
-        {iconUrl && <img src={iconUrl} alt="bot icon" style={{ width: 36, borderRadius: 24 }} />}
-        <b>{nombreChatBot}</b>
-        <select className="ml-auto" value={language} onChange={changeLanguage}>
-          <option value="es">ES</option>
-          <option value="en">EN</option>
+      <div className="chatbot-header">
+        <div className="flex items-center flex-1">
+          {iconUrl && (
+            <div className="chatbot-avatar-wrapper mr-3">
+              <img src={iconUrl} alt="bot icon" className="chatbot-avatar" />
+              <span className="status-indicator"></span>
+            </div>
+          )}
+          <div className="flex flex-col">
+            <b className="chatbot-title">{nombreChatBot}</b>
+            <span className="chatbot-status">En línea</span>
+          </div>
+        </div>
+        <select className="language-selector" value={language} onChange={changeLanguage}>
+          <option value="es">ES 🇪🇸</option>
+          <option value="en">EN 🇬🇧</option>
         </select>
       </div>
 
       {/* Speech bubble */}
       {showSpeechBubble && (
-        <div id="speech-bubble" className="chatbot-speech-bubble">
+        <div id="speech-bubble" className="speech-bubble">
           {speechBubble}
         </div>
       )}
@@ -392,62 +367,88 @@ export default function Chatbot() {
       <div
         id="chat-container"
         ref={chatContainerRef}
-        style={{ minHeight: 300, maxHeight: 380, overflowY: "auto", background: "#fff", padding: 12, marginBottom: 8 }}>
+        className="chatbot-messages-container"
+        role="log"
+        aria-live="polite"
+      >
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`message-box ${msg.role === "assistant" ? "bot-message" : "user-message"}`}
-            style={{
-              textAlign: msg.role === "assistant" ? "left" : "right",
-              marginBottom: 8
-            }}
+            className={`message-box ${msg.role === 'assistant' ? 'bot-message' : 'user-message'}`}
           >
-            <strong>{msg.role === "assistant" ? nombreChatBot : "Yo"}:</strong>{" "}
-            <span
-              className="message-content"
-              dangerouslySetInnerHTML={{ __html: applyTextFormatting(msg.content) }}
-            />
-            {msg.url && (
-              <div>
-                <a href={msg.url} className="button-confirm" target="_blank" rel="noopener noreferrer">Ok</a>
+            {msg.role === 'assistant' && (
+              <div className="bot-avatar-mini">
+                <img src={iconUrl} alt="bot" />
               </div>
             )}
+            <div className="message-content-wrapper">
+              <div
+                className="message-bubble"
+                dangerouslySetInnerHTML={{ __html: applyTextFormatting(msg.content) }}
+              />
+              <span className="message-time">
+                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
           </div>
         ))}
         {loading && (
           <div className="message-box bot-message">
-            <span>{nombreChatBot}: <i className="fa fa-spinner fa-spin" style={{ fontSize: 24 }} /></span>
+             <div className="bot-avatar-mini">
+                <img src={iconUrl} alt="bot" />
+              </div>
+            <div className="message-content-wrapper">
+              <div className="message-bubble">
+                <div className="typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
       {/* Quick replies */}
-      <div className="chatbot-quick-replies flex gap-2 mb-2">
-        {translations[language].messages.map((text, idx) => (
-          <button key={idx} type="button" onClick={() => sendQuickReply(text)}>{text}</button>
+      <div className="chatbot-quick-replies">
+        {translations[language].quickReplies.map((text, idx) => (
+          <button key={idx} type="button" onClick={() => sendQuickReply(text)}>
+            {text.length > 40 ? text.substring(0, 37) + '...' : text}
+          </button>
         ))}
       </div>
 
       {/* Input + acciones */}
-      <form className="flex gap-2 chatbot-input-wrapper" onSubmit={sendMessage} style={{ padding: 8 }}>
-        <input
-          id="message-input"
-          className="chatbot-input flex-1"
-          placeholder={translations[language].placeholder}
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          autoComplete="off"
-          disabled={loading}
-          onKeyDown={e => {
-            if (e.key === "Enter" && !e.shiftKey) sendMessage(e);
-          }}
-        />
-        <button type="submit" className="chatbot-send-btn" disabled={loading || !input.trim()}>Enviar</button>
-        <button type="button" className="chatbot-send-btn" onClick={resetChat}>Reset</button>
-      </form>
+      <div className="chatbot-input-container">
+        <form className="chatbot-input-form" onSubmit={sendMessage}>
+          <input
+            id="message-input"
+            className="chatbot-input"
+            placeholder={translations[language].placeholder}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            autoComplete="off"
+            disabled={loading}
+            onKeyDown={e => {
+              if (e.key === "Enter" && !e.shiftKey) sendMessage(e);
+            }}
+          />
+          <button
+            type="submit"
+            className="chatbot-send-btn"
+            disabled={loading || !input.trim()}
+            aria-label="Enviar mensaje"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+            </svg>
+          </button>
+        </form>
+      </div>
 
       {/* Política de privacidad */}
-      <div className="privacy-policy text-xs mt-2 p-2 rounded">
+      <div className="privacy-policy">
         <p>
           {translations[language].privacyPolicy}{" "}
           <a target="_blank" rel="noopener noreferrer" href={privacyPolicyUrl}>
@@ -457,33 +458,4 @@ export default function Chatbot() {
       </div>
     </div>
   );
-}
-
-
-if (typeof window !== 'undefined') {
-  window.renderChatbotWidget = function ({ apiBase, shopDomain }) {
-    let container = document.getElementById("chatbot-root");
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "chatbot-root";
-      document.body.appendChild(container);
-    }
-    fetch(`${apiBase}/guest_token?shop=${shopDomain}`)
-      .then(res => res.json())
-      .then(data => {
-        const jwtToken = data.token;
-        ReactDOM.createRoot(container).render(
-          React.createElement(ChatbotLoader, { apiBase, jwtToken })
-        );
-      });
-  };
-
-  // Autoinicializa al cargar si es Storefront
-  const shopDomain = window.Shopify?.shop;
-  if (shopDomain) {
-    window.renderChatbotWidget({
-      apiBase: "https://desarrollosfutura.com:5001/chat",
-      shopDomain
-    });
-  }
 }
